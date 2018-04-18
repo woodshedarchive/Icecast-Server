@@ -23,6 +23,8 @@
 #define MAX_YP_DIRECTORIES 25
 
 struct _mount_proxy;
+typedef struct ice_config_tag ice_config_t;
+typedef struct _listener_t listener_t;
 
 #include <libxml/tree.h>
 #include "common/thread/thread.h"
@@ -165,7 +167,7 @@ typedef struct _aliases {
     struct _aliases *next;
 } aliases;
 
-typedef struct _listener_t {
+struct _listener_t {
     struct _listener_t *next;
     int port;
     int so_sndbuf;
@@ -173,7 +175,7 @@ typedef struct _listener_t {
     int shoutcast_compat;
     char *shoutcast_mount;
     tlsmode_t tls;
-} listener_t;
+};
 
 typedef struct _config_tls_context {
     char *cert_file;
@@ -181,7 +183,7 @@ typedef struct _config_tls_context {
     char *cipher_list;
 } config_tls_context_t;
 
-typedef struct ice_config_tag {
+struct ice_config_tag {
     char *config_filename;
 
     char *location;
@@ -257,7 +259,7 @@ typedef struct ice_config_tag {
     int yp_url_timeout[MAX_YP_DIRECTORIES];
     int yp_touch_interval[MAX_YP_DIRECTORIES];
     int num_yp_directories;
-} ice_config_t;
+};
 
 typedef struct {
     rwlock_t config_lock;
@@ -277,7 +279,8 @@ void config_set_config(ice_config_t *config);
 listener_t *config_clear_listener (listener_t *listener);
 void config_clear(ice_config_t *config);
 mount_proxy *config_find_mount(ice_config_t *config, const char *mount, mount_type type);
-listener_t *config_get_listen_sock(ice_config_t *config, connection_t *con);
+
+listener_t *config_copy_listener_one(const listener_t *listener);
 
 config_options_t *config_parse_options(xmlNodePtr node);
 void config_clear_options(config_options_t *options);

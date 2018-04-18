@@ -303,31 +303,12 @@ static int _start_logging(void)
 }
 
 
-static int _start_listening(void)
-{
-    int i;
-    for(i=0; i < global.server_sockets; i++) {
-        if (sock_listen(global.serversock[i], ICECAST_LISTEN_QUEUE) == SOCK_ERROR)
-            return 0;
-
-        sock_set_blocking(global.serversock[i], 0);
-    }
-
-    return 1;
-}
-
 /* bind the socket and start listening */
 static int _server_proc_init(void)
 {
     ice_config_t *config = config_get_config_unlocked();
 
-    if (connection_setup_sockets (config) < 1)
-        return 0;
-
-    if (!_start_listening()) {
-        _fatal_error("Failed trying to listen on server socket");
-        return 0;
-    }
+    connection_setup_sockets(config);
 
     /* recreate the pid file */
     if (config->pidfile)

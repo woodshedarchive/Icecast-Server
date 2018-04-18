@@ -22,12 +22,11 @@
 
 #include "common/thread/thread.h"
 #include "slave.h"
-#include "common/net/sock.h"
+#include "listensocket.h"
 
 typedef struct ice_global_tag
 {
-    sock_t *serversock;
-    int server_sockets;
+    listensocket_container_t *listensockets;
 
     int running;
 
