@@ -310,6 +310,11 @@ static int _server_proc_init(void)
 
     connection_setup_sockets(config);
 
+    if (listensocket_container_sockcount(global.listensockets) < 1) {
+        ICECAST_LOG_ERROR("Can not listen on any sockets.");
+        return 0;
+    }
+
     /* recreate the pid file */
     if (config->pidfile)
     {
