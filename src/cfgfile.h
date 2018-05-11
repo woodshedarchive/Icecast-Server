@@ -167,8 +167,14 @@ typedef struct _aliases {
     struct _aliases *next;
 } aliases;
 
+typedef enum _listener_type_tag {
+    LISTENER_TYPE_NORMAL
+} listener_type_t;
+
 struct _listener_t {
     struct _listener_t *next;
+    char *id;
+    listener_type_t type;
     int port;
     int so_sndbuf;
     char *bind_address;
