@@ -459,6 +459,8 @@ static client_queue_t *create_client_node(client_t *client)
             node->shoutcast_mount = strdup(listener->shoutcast_mount);
     }
 
+    listensocket_release_listener(client->con->listensocket_effective);
+
     return node;
 }
 
@@ -1016,6 +1018,7 @@ static int _handle_aliases(client_t *client, char **uri)
         alias = alias->next;
     }
 
+    listensocket_release_listener(client->con->listensocket_effective);
     config_release_config();
 
     if (new_uri) {
@@ -1171,15 +1174,17 @@ static void __prepare_shoutcast_admin_cgi_request(client_t *client)
         return;
     }
 
-    listener = listensocket_get_listener(client->con->listensocket_effective);
     global_lock();
     config = config_get_config();
     sc_mount = config->shoutcast_mount;
 
+    listener = listensocket_get_listener(client->con->listensocket_effective);
     if (listener && listener->shoutcast_mount)
         sc_mount = listener->shoutcast_mount;
 
     httpp_set_query_param(client->parser, "mount", sc_mount);
+    listensocket_release_listener(client->con->listensocket_effective);
+
     httpp_setvar(client->parser, HTTPP_VAR_PROTOCOL, "ICY");
     client->password = strdup(pass);
     config_release_config();
