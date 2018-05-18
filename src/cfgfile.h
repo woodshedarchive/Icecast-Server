@@ -25,6 +25,7 @@
 struct _mount_proxy;
 typedef struct ice_config_tag ice_config_t;
 typedef struct _listener_t listener_t;
+typedef enum _listener_type_tag listener_type_t;
 
 #include <libxml/tree.h>
 #include "common/thread/thread.h"
@@ -167,9 +168,11 @@ typedef struct _aliases {
     struct _aliases *next;
 } aliases;
 
-typedef enum _listener_type_tag {
-    LISTENER_TYPE_NORMAL
-} listener_type_t;
+enum _listener_type_tag {
+    LISTENER_TYPE_ERROR,
+    LISTENER_TYPE_NORMAL,
+    LISTENER_TYPE_VIRTUAL
+};
 
 struct _listener_t {
     struct _listener_t *next;
