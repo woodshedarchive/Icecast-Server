@@ -29,7 +29,7 @@ int                         listensocket_ref(listensocket_t *self);
 int                         listensocket_unref(listensocket_t *self);
 int                         listensocket_refsock(listensocket_t *self);
 int                         listensocket_unrefsock(listensocket_t *self);
-connection_t *              listensocket_accept(listensocket_t *self);
+connection_t *              listensocket_accept(listensocket_t *self, listensocket_container_t *container);
 const listener_t *          listensocket_get_listener(listensocket_t *self);
 int                         listensocket_release_listener(listensocket_t *self);
 listener_type_t             listensocket_get_type(listensocket_t *self);
