@@ -598,7 +598,6 @@ static void command_buildm3u(client_t *client, source_t *source, int format)
     const char *mount = source->mount;
     const char *username = NULL;
     const char *password = NULL;
-    ice_config_t *config;
     ssize_t ret;
 
     COMMAND_REQUIRE(client, "username", username);
@@ -617,17 +616,7 @@ static void command_buildm3u(client_t *client, source_t *source, int format)
     }
 
 
-    config = config_get_config();
-    snprintf(client->refbuf->data + ret, PER_CLIENT_REFBUF_SIZE - ret,
-        "Content-Disposition: attachment; filename=listen.m3u\r\n\r\n"
-        "http://%s:%s@%s:%d%s\r\n",
-        username,
-        password,
-        config->hostname,
-        config->port,
-        mount
-    );
-    config_release_config();
+    client_get_baseurl(client, NULL, client->refbuf->data + ret, PER_CLIENT_REFBUF_SIZE - ret, username, password, "Content-Disposition: attachment; filename=listen.m3u\r\n\r\n", mount, "\r\n");
 
     client->respcode = 200;
     client->refbuf->len = strlen (client->refbuf->data);
@@ -982,7 +971,7 @@ static void command_stats(client_t *client, source_t *source, int response)
 
     ICECAST_LOG_DEBUG("Stats request, sending xml stats");
 
-    doc = stats_get_xml(1, mount, client->mode);
+    doc = stats_get_xml(1, mount, client);
     admin_send_response(doc, client, response, STATS_TRANSFORMED_REQUEST);
     xmlFreeDoc(doc);
     return;

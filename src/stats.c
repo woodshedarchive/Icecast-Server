@@ -830,7 +830,7 @@ static inline void __add_authstack (auth_stack_t *stack, xmlNodePtr parent) {
         auth_stack_next(&stack);
    }
 }
-static xmlNodePtr _dump_stats_to_doc (xmlNodePtr root, const char *show_mount, int hidden) {
+static xmlNodePtr _dump_stats_to_doc (xmlNodePtr root, const char *show_mount, int hidden, client_t *client) {
     avl_node *avlnode;
     xmlNodePtr ret = NULL;
     ice_config_t *config;
@@ -871,7 +871,13 @@ static xmlNodePtr _dump_stats_to_doc (xmlNodePtr root, const char *show_mount, i
             while (avlnode2)
             {
                 stats_node_t *stat = avlnode2->key;
-                xmlNewTextChild (xmlnode, NULL, XMLSTR(stat->name), XMLSTR(stat->value));
+                if (client && strcmp(stat->name, "listenurl") == 0) {
+                    char buf[512];
+                    client_get_baseurl(client, NULL, buf, sizeof(buf), NULL, NULL, NULL, source->source, NULL);
+                    xmlNewTextChild (xmlnode, NULL, XMLSTR(stat->name), XMLSTR(buf));
+                } else {
+                    xmlNewTextChild (xmlnode, NULL, XMLSTR(stat->name), XMLSTR(stat->value));
+                }
                 avlnode2 = avl_get_next (avlnode2);
             }
 
@@ -1023,7 +1029,7 @@ void stats_transform_xslt(client_t *client, const char *uri)
     char *xslpath = util_get_path_from_normalised_uri(uri);
     const char *mount = httpp_get_query_param(client->parser, "mount");
 
-    doc = stats_get_xml(0, mount, client->mode);
+    doc = stats_get_xml(0, mount, client);
 
     xslt_transform(doc, xslpath, client);
 
@@ -1054,7 +1060,7 @@ static void __add_metadata(xmlNodePtr node, const char *tag) {
     free(name);
 }
 
-xmlDocPtr stats_get_xml(int show_hidden, const char *show_mount, operation_mode mode)
+xmlDocPtr stats_get_xml(int show_hidden, const char *show_mount, client_t *client)
 {
     xmlDocPtr doc;
     xmlNodePtr node;
@@ -1064,12 +1070,12 @@ xmlDocPtr stats_get_xml(int show_hidden, const char *show_mount, operation_mode 
     node = xmlNewDocNode (doc, NULL, XMLSTR("icestats"), NULL);
     xmlDocSetRootElement(doc, node);
 
-    node = _dump_stats_to_doc (node, show_mount, show_hidden);
+    node = _dump_stats_to_doc(node, show_mount, show_hidden, client);
 
     if (show_mount && node) {
         avl_tree_rlock(global.source_tree);
         source = source_find_mount_raw(show_mount);
-        admin_add_listeners_to_mount(source, node, mode);
+        admin_add_listeners_to_mount(source, node, client->mode);
         avl_tree_unlock(global.source_tree);
     }
 
